@@ -1,0 +1,25 @@
+version: '3.8'
+
+services:
+  grafana-chat:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        TARGETPLATFORM: ${TARGETPLATFORM:-linux/amd64}
+    ports:
+      - "${PORT:-8000}:8000"
+    environment:
+      - GRAFANA_API_KEY=${GRAFANA_API_KEY}
+      - GRAFANA_URL=${GRAFANA_URL}
+      - HOST=${HOST:-0.0.0.0}
+      - PORT=${PORT:-8000}
+    volumes:
+      - ./templates:/app/templates
+      - ./.env:/app/.env
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
