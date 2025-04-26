@@ -6,12 +6,16 @@ from datetime import datetime, timedelta
 import requests
 import os
 from dotenv import load_dotenv
+from ai_client import AIClient
 
 app = FastAPI()
 templates = Jinja2Templates(directory="templates")
 
 # Load environment variables
 load_dotenv()
+
+# Initialize OpenAI client
+ai_client = AIClient()
 
 # Grafana configuration
 GRAFANA_URL = os.getenv('GRAFANA_URL', 'http://localhost:3000')
@@ -124,6 +128,12 @@ async def search_graphs(query: str = Form(...), time_from: str = Form(None), tim
         # Validate query
         if not query or not query.strip():
             raise HTTPException(status_code=400, detail='Search query cannot be empty')
+            
+        # Analyze query using OpenAI
+        analysis = ai_client.analyze_query(query)
+        if analysis['success']:
+            # Use the enhanced analysis to improve search results
+            query = analysis['enhanced_analysis']
             
         # Search for dashboards matching the query
         try:
